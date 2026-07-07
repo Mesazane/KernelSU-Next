@@ -8,7 +8,27 @@
 #include <linux/poll.h>
 #include <linux/spinlock.h>
 #include <linux/types.h>
+#include <linux/version.h>
 #include <linux/wait.h>
+
+/*
+ * __poll_t and the EPOLL* constants only became reachable through
+ * <linux/poll.h> in Linux 4.16. On older trees (e.g. the 4.14 Exynos9820
+ * kernel) fall back to the classic poll flags so this queue builds against
+ * both. The classic POLL and EPOLL flags share the same numeric values.
+ */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 16, 0)
+typedef unsigned int __poll_t;
+#ifndef EPOLLIN
+#define EPOLLIN POLLIN
+#endif
+#ifndef EPOLLRDNORM
+#define EPOLLRDNORM POLLRDNORM
+#endif
+#ifndef EPOLLHUP
+#define EPOLLHUP POLLHUP
+#endif
+#endif
 
 #define KSU_EVENT_RECORD_FLAG_INTERNAL (1U << 0)
 #define KSU_EVENT_QUEUE_TYPE_DROPPED ((__u16)0xFFFF)
